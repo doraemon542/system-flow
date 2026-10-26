@@ -1,0 +1,55 @@
+
+
+{
+  "systemGatewayName": "MFS-Smart-Verification-Broker",
+  "triggerCondition": "LOCATION_SUDDEN_MISMATCH_DETECTED",
+  "securityComplianceLevel": "HIGH_CONFIDENCE_FALLBACK",
+  
+  "primaryAuthPipeline": {
+    "step_01": "USER_PIN_SUBMISSION",
+    "validationEngine": "GEOLOCATION_AND_IP_CHECK",
+    "onAnomalyAction": "INITIALIZE_FRAUD_EVALUATOR"
+  },
+
+  "fraudEngineDecisionTree": {
+    "evaluationCriteria": {
+      "trustedDeviceFingerprint": true,
+      "locationDistanceDelta": "Greater than 50km from base telemetry",
+      "historicalPatternMatch": false
+    },
+    "executionRouting": {
+      "legacyCompetitorBehavior": "HARD_LOCKOUT_GENERIC_ERROR_104",
+      "proposedOptimizedBehavior": "ROUTE_TO_ALTERNATIVE_VERIFICATION_FALLBACK"
+    }
+  },
+
+  "fallbackAuthenticationTracks": [
+    {
+      "trackSequence": 1,
+      "verificationMethod": "SECURE_WHATSAPP_OTP_INTEGRATION",
+      "sessionValiditySeconds": 180,
+      "maxAllowedAttempts": 3,
+      "payloadSpecification": {
+        "encryptionStandard": "AES-256-GCM",
+        "deliveryEndpoint": "REGISTERED_USER_MSISDN"
+      }
+    },
+    {
+      "trackSequence": 2,
+      "verificationMethod": "BIOMETRIC_PASSKEY_TEMPORARY_BYPASS",
+      "hardwareRequirement": "DEVICE_TEE_ENCLAVE",
+      "apiNativeHook": "ANDROID_BIOMETRIC_PROMPT_FIDO2",
+      "payloadSpecification": {
+        "tokenValidationMode": "DEVICE_SIGNED_JSON_WEB_TOKEN"
+      }
+    }
+  ],
+
+  "businessMetricsTelemetry logs": {
+    "successKPIs": [
+      "User_DropOff_Prevention_Rate",
+      "Alternative_Verification_Latency_Ms",
+      "Customer_Support_Ticket_Reduction"
+    ]
+  }
+}
